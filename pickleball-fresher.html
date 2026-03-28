@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏓 Pickleball Group</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111210; --ink2:#3a3a38; --ink3:#6b6b68; --ink4:#9a9a97;
+  --paper:#fafaf8; --surface:#ffffff; --border:#e8e7e2; --border2:#d0cfc9;
+  --green:#0f7a52; --green-bg:#e8f5ee; --green-soft:#c6ecd8;
+  --red:#c0392b; --red-bg:#fdecea; --red-soft:#f9c4bf;
+  --amber:#b8620a; --amber-bg:#fef3e2; --amber-soft:#fcd49a;
+  --blue:#1a5fa8; --blue-bg:#eaf1fb; --blue-soft:#b8d3f4;
+  --accent:#0f7a52;
+  --r:10px; --r-sm:6px; --r-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.5;min-height:100vh;}
+
+/* ── HEADER ── */
+.app-header{background:var(--ink);color:#fff;padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.app-logo{display:flex;align-items:center;gap:10px;}
+.app-logo-icon{width:30px;height:30px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.app-logo-name{font-weight:700;font-size:15px;letter-spacing:.01em;}
+.app-logo-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;}
+.app-header-right{display:flex;align-items:center;gap:6px;}
+.header-pill{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;}
+.hp-pending{background:rgba(255,160,0,.18);color:#ffd580;}
+.hp-ok{background:rgba(15,122,82,.25);color:#6ee7b7;}
+
+/* ── TAB NAV ── */
+.tab-nav{background:var(--surface);border-bottom:1.5px solid var(--border);display:flex;padding:0 20px;overflow-x:auto;scrollbar-width:none;position:sticky;top:54px;z-index:100;}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-btn{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--ink4);background:none;border:none;border-bottom:2.5px solid transparent;padding:12px 14px 10px;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;display:flex;align-items:center;gap:5px;}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--accent);}
+.tab-btn:hover:not(.active){color:var(--ink2);}
+.tab-dot{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;}
+
+/* ── MAIN ── */
+main{max-width:680px;margin:0 auto;padding:20px 16px 100px;}
+.section{display:none;animation:fadeUp .2s ease;}
+.section.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:14px;}
+.card-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:14px;}
+
+/* ── HERO STAT ── */
+.hero-stat{border-radius:var(--r-lg);padding:22px 20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.hero-stat.urgent{background:var(--ink);color:#fff;}
+.hero-stat.settled{background:var(--green-bg);border:1.5px solid var(--green-soft);}
+.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;opacity:.55;margin-bottom:6px;}
+.hero-amount{font-family:'DM Mono',monospace;font-size:40px;font-weight:500;line-height:1;letter-spacing:-.02em;}
+.hero-amount.urgent{color:#fff;}
+.hero-amount.positive{color:var(--green);}
+.hero-sub{font-size:12px;margin-top:8px;opacity:.6;}
+.hero-action{margin-top:16px;}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .1s;letter-spacing:.01em;}
+.btn:active{transform:scale(.98);}
+.btn-white{background:#fff;color:var(--ink);}
+.btn-white:hover{opacity:.9;}
+.btn-green{background:var(--green);color:#fff;width:100%;}
+.btn-green:hover{opacity:.88;}
+.btn-outline{background:transparent;color:var(--ink3);border:1.5px solid var(--border2);width:100%;}
+.btn-outline:hover{border-color:var(--ink3);}
+.btn-ghost{background:var(--paper);color:var(--ink3);border:1.5px dashed var(--border2);width:100%;margin-top:8px;}
+.btn-ghost:hover{border-color:var(--ink3);color:var(--ink);}
+.btn-settled{background:var(--paper);color:var(--ink4);border:1.5px solid var(--border);width:100%;}
+
+/* ── STATUS BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.03em;}
+.b-red{background:var(--red-bg);color:var(--red);}
+.b-green{background:var(--green-bg);color:var(--green);}
+.b-amber{background:var(--amber-bg);color:var(--amber);}
+.b-blue{background:var(--blue-bg);color:var(--blue);}
+.b-ink{background:var(--ink);color:#fff;}
+
+/* ── ROWS ── */
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.row:last-child{border-bottom:none;}
+.rl{color:var(--ink3);}
+.rv{font-weight:600;color:var(--ink);font-family:'DM Mono',monospace;font-size:13px;}
+.rv.pos{color:var(--green);}
+.rv.neg{color:var(--red);}
+.rv.muted{font-family:'DM Sans',sans-serif;font-weight:400;color:var(--ink4);font-size:12px;}
+
+/* ── GUEST LIST ── */
+.guest-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.guest-item:last-child{border-bottom:none;}
+.guest-avatar{width:32px;height:32px;border-radius:50%;background:var(--paper);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink3);flex-shrink:0;font-family:'DM Mono',monospace;}
+.guest-info{flex:1;min-width:0;}
+.guest-name{font-weight:600;font-size:13px;color:var(--ink);}
+.guest-amount{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink3);margin-top:1px;}
+.guest-check{width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent;transition:all .15s;flex-shrink:0;}
+.guest-check:hover{border-color:var(--green);background:var(--green-bg);}
+.guest-check.paid{background:var(--green);border-color:var(--green);color:#fff;}
+.guest-item.paid-row{opacity:.4;}
+.guest-item.paid-row .guest-name{text-decoration:line-through;}
+.partner-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r-sm);background:var(--paper);border:1.5px solid var(--border);}
+.chip-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
+.chip-av-s{background:var(--blue-bg);color:var(--blue);}
+.chip-av-f{background:var(--green-bg);color:var(--green);}
+
+/* ── SESSION ACCORDION ── */
+.session-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden;transition:border-color .15s;}
+.session-card:hover{border-color:var(--border2);}
+.session-hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;user-select:none;}
+.session-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--ink4);margin-bottom:3px;}
+.session-date{font-size:14px;font-weight:700;color:var(--ink);}
+.session-meta{font-size:11px;color:var(--ink4);margin-top:2px;}
+.session-right{display:flex;align-items:center;gap:8px;}
+.chevron{font-size:11px;color:var(--ink4);transition:transform .2s;}
+.chevron.open{transform:rotate(180deg);}
+.session-body{border-top:1.5px solid var(--border);padding:16px 18px;}
+.session-body.closed{display:none;}
+
+/* ── PROGRESS BAR ── */
+.prog{margin-top:12px;}
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--ink4);margin-bottom:5px;}
+.prog-track{background:var(--paper);border:1px solid var(--border);border-radius:4px;height:8px;overflow:hidden;}
+.prog-fill{background:var(--green);height:100%;border-radius:4px;transition:width .4s ease;}
+
+/* ── PROFIT TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);padding:0 0 8px;border-bottom:1.5px solid var(--border);}
+.tbl th:not(:first-child){text-align:right;}
+.tbl td{padding:9px 0;border-bottom:1px solid var(--border);color:var(--ink3);}
+.tbl td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl .total td{border-top:2px solid var(--ink);border-bottom:none;padding-top:10px;font-weight:700;color:var(--ink);font-family:'DM Mono',monospace;}
+td.pos{color:var(--green)!important;font-weight:600;}
+td.neg{color:var(--red)!important;font-weight:600;}
+td.muted{color:var(--ink4)!important;font-family:'DM Sans',sans-serif!important;font-size:12px;}
+
+/* ── ALERT ── */
+.alert{border-radius:var(--r-sm);padding:11px 14px;font-size:12.5px;display:flex;align-items:flex-start;gap:9px;margin-bottom:12px;line-height:1.6;border:1px solid;}
+.alert.a-green{background:var(--green-bg);color:var(--green);border-color:var(--green-soft);}
+.alert.a-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-soft);}
+.alert.a-blue{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-soft);}
+.alert.a-red{background:var(--red-bg);color:var(--red);border-color:var(--red-soft);}
+
+/* ── FORM ── */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:600;color:var(--ink2);display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--surface);outline:none;transition:border-color .15s;}
+.form-input:focus{border-color:var(--accent);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-hint{font-size:11px;color:var(--ink4);margin-top:4px;}
+
+/* ── CALC PREVIEW ── */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;}
+.calc-cell{background:var(--paper);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:12px;}
+.calc-cell.highlight{background:var(--ink);border-color:var(--ink);}
+.calc-cell-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink4);margin-bottom:5px;}
+.calc-cell.highlight .calc-cell-label{color:rgba(255,255,255,.5);}
+.calc-cell-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--ink);}
+.calc-cell.highlight .calc-cell-val{color:#fff;}
+.calc-cell-sub{font-size:10px;color:var(--ink4);margin-top:3px;}
+.calc-cell.highlight .calc-cell-sub{color:rgba(255,255,255,.35);}
+
+/* ── DIVIDER ── */
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+.section-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin:16px 0 10px;}
+
+/* ── RULES ── */
+.rule{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.rule:last-child{border-bottom:none;}
+.rule-n{width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;font-family:'DM Mono',monospace;}
+.rule-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.rule-desc{font-size:12px;color:var(--ink4);line-height:1.6;}
+
+/* ── MILESTONE ── */
+.milestone{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r-sm);font-size:13px;margin-top:10px;}
+.ms-green{background:var(--green-bg);color:var(--green);}
+.ms-icon{font-size:18px;flex-shrink:0;}
+
+/* ── CODE BLOCK ── */
+.code-block{background:var(--ink);color:#a8f0c8;font-family:'DM Mono',monospace;font-size:12px;padding:16px;border-radius:var(--r-sm);line-height:2;}
+
+@media(max-width:480px){
+  .calc-grid{grid-template-columns:1fr 1fr;}
+  .form-grid{grid-template-columns:1fr 1fr;}
+  .hero-amount{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-logo">
+    <div class="app-logo-icon">🏓</div>
+    <div>
+      <div class="app-logo-name">Pickleball Group</div>
+      <div class="app-logo-sub">Sharon & Fresh</div>
+    </div>
+  </div>
+  <div class="app-header-right">
+    <span class="header-pill hp-pending" id="header-status">💰 NT$400 待匯款</span>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('payment')">💳 訪客付款</button>
+  <button class="tab-btn" onclick="showTab('settlement')">🤝 合夥人結算</button>
+  <button class="tab-btn" onclick="showTab('racket')">🏓 球拍生意</button>
+  <button class="tab-btn" onclick="showTab('add')">＋ 新增場次</button>
+  <button class="tab-btn" onclick="showTab('rules')">📋 帳務規則</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════
+     TAB 1：訪客付款管理
+══════════════════════════════ -->
+<div id="tab-payment" class="section active">
+
+  <div class="alert a-blue">
+    <span>ℹ️</span>
+    <div>所有款項匯給 <strong>Fresh</strong>。訪客確認匯款後，請點選右側圓圈打勾。</div>
+  </div>
+
+  <!-- 第2場 -->
+  <div class="session-card">
+    <div class="session-hdr" onclick="toggleSession(this)">
+      <div>
+        <div class="session-num">第2場</div>
+        <div class="session-date">2026 / 03 / 29 <span style="font-weight:400;color:var(--ink4);font-size:12px;">週日</span></div>
+        <div class="session-meta">共 7 人・5 位訪客・08:00–10:00</div>
+      </div>
+      <div class="session-right">
+        <span class="badge b-ink" id="s2-unpaid-badge">5 人未付</span>
+        <span class="chevron open">▼</span>
+      </div>
+    </div>
+    <div class="session-body" id="s2-session-body">
+
+      <div class="section-label">訪客・各付 <span style="font-family:'DM Mono',monospace;color:var(--amber);">NT$443</span>（場地 NT$343 ＋ 租借 NT$100）</div>
+      <div id="s2-guest-list">
+        <div class="guest-item" data-session="s2">
+          <div class="guest-avatar">A</div>
+          <div class="guest-info"><div class="guest-name">訪客 A</div><div class="guest-amount">NT$443 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s2')">✓</button>
+        </div>
+        <div class="guest-item" data-session="s2">
+          <div class="guest-avatar">B</div>
+          <div class="guest-info"><div class="guest-name">訪客 B</div><div class="guest-amount">NT$443 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s2')">✓</button>
+        </div>
+        <div class="guest-item" data-session="s2">
+          <div class="guest-avatar">C</div>
+          <div class="guest-info"><div class="guest-name">訪客 C</div><div class="guest-amount">NT$443 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s2')">✓</button>
+        </div>
+        <div class="guest-item" data-session="s2">
+          <div class="guest-avatar">D</div>
+          <div class="guest-info"><div class="guest-name">訪客 D</div><div class="guest-amount">NT$443 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s2')">✓</button>
+        </div>
+        <div class="guest-item" data-session="s2">
+          <div class="guest-avatar">E</div>
+          <div class="guest-info"><div class="guest-name">訪客 E</div><div class="guest-amount">NT$443 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s2')">✓</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">合夥人・各付場地費均攤</div>
+      <div class="partner-chip" style="margin-bottom:8px;">
+        <div class="chip-av chip-av-s">S</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">Sharon</div><div style="font-size:11px;color:var(--ink4);">NT$343 → Fresh</div></div>
+        <button class="guest-check" onclick="toggleGuest(this,'s2-sharon')">✓</button>
+      </div>
+      <div class="partner-chip">
+        <div class="chip-av chip-av-f">F</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">Fresh</div><div style="font-size:11px;color:var(--ink4);">場地費代墊人，無需匯款</div></div>
+        <span class="badge b-green">代墊中</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第1場 -->
+  <div class="session-card">
+    <div class="session-hdr" onclick="toggleSession(this)">
+      <div>
+        <div class="session-num">第1場</div>
+        <div class="session-date">2026 / 03 / 22 <span style="font-weight:400;color:var(--ink4);font-size:12px;">週六</span></div>
+        <div class="session-meta">共 5 人・3 位訪客・08:00–10:00</div>
+      </div>
+      <div class="session-right">
+        <span class="badge b-ink" id="s1-unpaid-badge">3 人未付</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="session-body closed" id="s1-session-body">
+
+      <div class="section-label">訪客・各付 <span style="font-family:'DM Mono',monospace;color:var(--amber);">NT$460</span>（場地 NT$360 ＋ 租借 NT$100）</div>
+      <div id="s1-guest-list">
+        <div class="guest-item" data-session="s1">
+          <div class="guest-avatar">A</div>
+          <div class="guest-info"><div class="guest-name">訪客 A</div><div class="guest-amount">NT$460 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s1')">✓</button>
+        </div>
+        <div class="guest-item" data-session="s1">
+          <div class="guest-avatar">B</div>
+          <div class="guest-info"><div class="guest-name">訪客 B</div><div class="guest-amount">NT$460 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s1')">✓</button>
+        </div>
+        <div class="guest-item" data-session="s1">
+          <div class="guest-avatar">C</div>
+          <div class="guest-info"><div class="guest-name">訪客 C</div><div class="guest-amount">NT$460 → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'s1')">✓</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">合夥人</div>
+      <div class="partner-chip" style="margin-bottom:8px;">
+        <div class="chip-av chip-av-s">S</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">Sharon</div><div style="font-size:11px;color:var(--ink4);">NT$360 → Fresh</div></div>
+        <button class="guest-check" onclick="toggleGuest(this,'s1-sharon')">✓</button>
+      </div>
+      <div class="partner-chip">
+        <div class="chip-av chip-av-f">F</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">Fresh</div><div style="font-size:11px;color:var(--ink4);">場地費代墊人，無需匯款</div></div>
+        <span class="badge b-green">代墊中</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════
+     TAB 2：合夥人結算
+══════════════════════════════ -->
+<div id="tab-settlement" class="section">
+
+  <!-- Hero：Fresh 待匯給 Sharon -->
+  <div class="hero-stat urgent" id="hero-settle">
+    <div class="hero-eyebrow">💰 Fresh 待匯給 Sharon</div>
+    <div class="hero-amount urgent" id="settle-amount">NT$400</div>
+    <div class="hero-sub">球拍租借收益・兩人各半・Sharon 的應得份額</div>
+    <div class="hero-action" id="settle-action-area">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-white" onclick="markPayout('s2')" id="btn-s2" style="flex:1;">✓ 第2場 NT$250 已匯</button>
+        <button class="btn btn-white" onclick="markPayout('s1')" id="btn-s1" style="flex:1;">✓ 第1場 NT$150 已匯</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 逐場明細 -->
+  <div class="card">
+    <div class="card-label">逐場結算明細</div>
+    <div class="row">
+      <div>
+        <div style="font-size:13px;font-weight:600;">第2場 2026/03/29</div>
+        <div style="font-size:11px;color:var(--ink4);">5位訪客 × NT$100 = NT$500 租借收入</div>
+      </div>
+      <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);">NT$250</span>
+        <span class="badge b-amber" id="badge-s2">待匯款</span>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <div style="font-size:13px;font-weight:600;">第1場 2026/03/22</div>
+        <div style="font-size:11px;color:var(--ink4);">3位訪客 × NT$100 = NT$300 租借收入</div>
+      </div>
+      <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);">NT$150</span>
+        <span class="badge b-amber" id="badge-s1">待匯款</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;border-top:2px solid var(--ink);margin-top:4px;">
+      <span style="font-size:13px;font-weight:700;">合計待匯</span>
+      <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;" id="settle-total-display">NT$400</span>
+    </div>
+  </div>
+
+  <!-- 球拍費說明 -->
+  <div class="card">
+    <div class="card-label">球拍費・已結清 ✅</div>
+    <div class="row"><span class="rl">Fresh 先付全額</span><span class="rv">NT$728</span></div>
+    <div class="row"><span class="rl">Sharon 已匯款給 Fresh</span><span class="rv pos">NT$364 ✓</span></div>
+    <div class="row"><span class="rl">結算狀態</span><span class="badge b-green">雙方各負擔 NT$364，已結清</span></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════
+     TAB 3：球拍生意
+══════════════════════════════ -->
+<div id="tab-racket" class="section">
+
+  <!-- Hero -->
+  <div class="hero-stat settled">
+    <div class="hero-eyebrow" style="color:var(--green);">🏓 球拍租借生意・累計淨收益</div>
+    <div class="hero-amount positive">＋NT$72</div>
+    <div class="hero-sub" style="color:var(--green);opacity:.7;">初始成本 NT$728・兩場後已完全回收</div>
+  </div>
+
+  <!-- 回本追蹤 -->
+  <div class="card">
+    <div class="card-label">回本追蹤</div>
+    <div class="row"><span class="rl">初始投資成本</span><span class="rv">NT$728</span></div>
+    <div class="row"><span class="rl">回本所需租借人次</span><span class="rv">8 人次</span></div>
+    <div class="row"><span class="rl">實際回本場次</span><span class="rv pos">第2場・2026/03/29 ✓</span></div>
+    <div class="row"><span class="rl">回本耗時</span><span class="rv pos">僅 7 天</span></div>
+    <div class="prog">
+      <div class="prog-labels">
+        <span>累計收入 NT$800</span>
+        <span style="font-family:'DM Mono',monospace;font-weight:600;color:var(--green);">110%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:100%;"></div></div>
+    </div>
+    <div class="milestone ms-green" style="margin-top:12px;">
+      <span class="ms-icon">🎉</span>
+      <span>第2場起每一筆租借收入均為<strong>純淨收益</strong></span>
+    </div>
+  </div>
+
+  <!-- 逐場明細 -->
+  <div class="card">
+    <div class="card-label">逐場收益明細</div>
+    <table class="tbl">
+      <thead><tr><th>場次</th><th>租借人數</th><th>本場收入</th><th>累計收入</th><th>累計淨收益</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>第1場 03/22</td>
+          <td>3 人</td>
+          <td>NT$300</td>
+          <td>NT$300</td>
+          <td class="neg">−NT$428</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600;color:var(--ink);">第2場 03/29</td>
+          <td>5 人</td>
+          <td>NT$500</td>
+          <td class="pos">NT$800</td>
+          <td class="pos">＋NT$72 🎉</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 合夥人各自收益 -->
+  <div class="card">
+    <div class="card-label">合夥人各自收益（球拍生意）</div>
+    <table class="tbl">
+      <thead><tr><th>項目</th><th>Sharon</th><th>Fresh</th></tr></thead>
+      <tbody>
+        <tr><td>初始投資</td><td class="neg">−NT$364</td><td class="neg">−NT$364</td></tr>
+        <tr><td>第1場收益 ÷ 2</td><td class="pos">＋NT$150</td><td class="pos">＋NT$150</td></tr>
+        <tr><td>第2場收益 ÷ 2</td><td class="pos">＋NT$250</td><td class="pos">＋NT$250</td></tr>
+        <tr class="total"><td>各自淨收益</td><td class="pos">＋NT$36</td><td class="pos">＋NT$36</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;color:var(--ink4);line-height:1.7;">
+      收益由 Fresh 統一持有，應定期匯款給 Sharon。詳見「合夥人結算」。
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════
+     TAB 4：新增場次
+══════════════════════════════ -->
+<div id="tab-add" class="section">
+
+  <div class="card">
+    <div class="card-label">場次基本資料</div>
+    <div class="form-group">
+      <label class="form-label">活動日期</label>
+      <input type="date" id="add-date" class="form-input" oninput="recalc()">
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">場地費（NT$）</label>
+        <input type="number" id="add-venue" class="form-input" placeholder="例：2400" min="0" oninput="recalc()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">總出席人數</label>
+        <input type="number" id="add-total" class="form-input" placeholder="例：7" min="2" oninput="recalc();syncGuests()">
+        <div class="form-hint">含 Sharon & Fresh 2 人</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 即時試算 -->
+  <div id="calc-wrap" style="display:none;">
+    <div class="calc-grid">
+      <div class="calc-cell">
+        <div class="calc-cell-label">場地費 / 人</div>
+        <div class="calc-cell-val" id="c-venue-pp">—</div>
+        <div class="calc-cell-sub">NT$</div>
+      </div>
+      <div class="calc-cell">
+        <div class="calc-cell-label">訪客人數</div>
+        <div class="calc-cell-val" id="c-guests">—</div>
+        <div class="calc-cell-sub">人（總人數 − 2）</div>
+      </div>
+      <div class="calc-cell" style="border-color:var(--amber-soft);background:var(--amber-bg);">
+        <div class="calc-cell-label" style="color:var(--amber);">訪客應付 / 人</div>
+        <div class="calc-cell-val" style="color:var(--amber);" id="c-guest-total">—</div>
+        <div class="calc-cell-sub" style="color:var(--amber);opacity:.7;">場地 ＋ NT$100</div>
+      </div>
+      <div class="calc-cell highlight">
+        <div class="calc-cell-label">Sharon 應付</div>
+        <div class="calc-cell-val" id="c-sharon">—</div>
+        <div class="calc-cell-sub">場地費均攤</div>
+      </div>
+    </div>
+
+    <div class="card" style="border-color:var(--green-soft);background:var(--green-bg);margin-bottom:14px;">
+      <div class="card-label" style="color:var(--green);">💰 Fresh 當場應收總計</div>
+      <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--green);" id="c-fresh-total">—</div>
+      <div style="margin-top:10px;">
+        <div class="row" style="border-color:rgba(15,122,82,.2);"><span class="rl" style="color:var(--green);opacity:.7;">訪客合計（<span id="c-g-cnt">0</span>人）</span><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);" id="c-from-guests">—</span></div>
+        <div class="row" style="border-color:rgba(15,122,82,.2);border-bottom:none;"><span class="rl" style="color:var(--green);opacity:.7;">Sharon 場地費</span><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);" id="c-from-sharon">—</span></div>
+      </div>
+    </div>
+
+    <!-- 球拍生意預覽 -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-label">🏓 球拍生意・加入後預覽</div>
+      <table class="tbl">
+        <thead><tr><th>項目</th><th>目前</th><th>加入後</th></tr></thead>
+        <tbody>
+          <tr><td>累計租借收入</td><td>NT$800</td><td style="font-weight:600;" id="c-ri">—</td></tr>
+          <tr><td>累計淨收益</td><td class="pos">＋NT$72</td><td id="c-net" style="font-weight:600;">—</td></tr>
+          <tr><td>各人淨收益</td><td class="pos">＋NT$36</td><td id="c-each" style="font-weight:600;">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 訪客姓名 -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-label">訪客姓名（選填）</div>
+      <div id="guest-input-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <button class="btn btn-ghost" onclick="addGuestField()" style="margin-top:10px;">＋ 新增訪客欄位</button>
+    </div>
+
+    <button class="btn btn-green" onclick="confirmAdd()">確認並加入正式紀錄</button>
+    <p style="font-size:11px;color:var(--ink4);text-align:center;margin-top:8px;">加入後將同步更新場次紀錄、合夥人結算及球拍生意</p>
+  </div>
+
+  <!-- 資料格式說明 -->
+  <div class="card" style="margin-top:20px;">
+    <div class="card-label">📋 提供給 Claude 的標準格式</div>
+    <div class="code-block">
+日期：2026/04/12<br>
+時段：08:00–10:00<br>
+場地費：NT$2,400<br>
+總人數：7<br>
+訪客姓名：小明、小華、小美、小強、小玲
+    </div>
+    <div style="margin-top:10px;font-size:12px;color:var(--ink4);line-height:1.7;">
+      提供以上格式給 Claude，即可更新網站所有數字。<br>訪客姓名為選填，未填寫將顯示「訪客 A、B…」。
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════
+     TAB 5：帳務規則
+══════════════════════════════ -->
+<div id="tab-rules" class="section">
+  <div class="card">
+    <div class="card-label">費用分攤規則</div>
+    <div class="rule">
+      <div class="rule-n">1</div>
+      <div><div class="rule-title">場地費由 Fresh 代墊，事後全員均攤</div><div class="rule-desc">每次活動由 Fresh 統一繳清場地費。活動結束後，所有出席者（含兩位合夥人）依總人數均攤，各自匯款給 Fresh。</div></div>
+    </div>
+    <div class="rule">
+      <div class="rule-n">2</div>
+      <div><div class="rule-title">球拍租借費：訪客每人 NT$100</div><div class="rule-desc">每位訪客每次使用球拍支付 NT$100。兩位合夥人共同持有球拍，免付租借費。</div></div>
+    </div>
+    <div class="rule">
+      <div class="rule-n">3</div>
+      <div><div class="rule-title">租借收益兩人各半，Fresh 定期匯款給 Sharon</div><div class="rule-desc">每場租借收入全數由 Fresh 統一收取，應定期將 Sharon 應得的 50% 匯至其帳戶。紀錄於「合夥人結算」頁面。</div></div>
+    </div>
+    <div class="rule" style="border-bottom:none;">
+      <div class="rule-n">4</div>
+      <div><div class="rule-title">球拍成本各半，先付者事後收款</div><div class="rule-desc">球拍 NT$728，兩人各負擔 NT$364。本次由 Fresh 先付全額，Sharon 已匯款 NT$364 給 Fresh，帳務已結清。</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label">每場收款流程</div>
+    <div class="rule"><div class="rule-n" style="background:var(--green);">①</div><div><div class="rule-title">Fresh 公告當日場地費與人數</div><div class="rule-desc">活動結束後通知所有人均攤金額。</div></div></div>
+    <div class="rule"><div class="rule-n" style="background:var(--green);">②</div><div><div class="rule-title">訪客匯「場地費均攤 ＋ NT$100」給 Fresh</div><div class="rule-desc">於「訪客付款」頁面勾選確認收款。</div></div></div>
+    <div class="rule"><div class="rule-n" style="background:var(--green);">③</div><div><div class="rule-title">Sharon 匯場地費均攤給 Fresh</div><div class="rule-desc">僅須支付場地費，無需另付租借費。</div></div></div>
+    <div class="rule" style="border-bottom:none;"><div class="rule-n" style="background:var(--green);">④</div><div><div class="rule-title">Fresh 將租借收益的 50% 匯給 Sharon</div><div class="rule-desc">於「合夥人結算」頁面標記完成，結束本場帳務。</div></div></div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── Tab ──
+function showTab(n){
+  const ns=['payment','settlement','racket','add','rules'];
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',ns[i]===n));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Session accordion ──
+function toggleSession(hdr){
+  const body=hdr.nextElementSibling;
+  const ch=hdr.querySelector('.chevron');
+  const closed=body.classList.contains('closed');
+  body.classList.toggle('closed',!closed);
+  ch.classList.toggle('open',closed);
+}
+
+// ── Guest payment toggle ──
+const unpaidCounts={s1:3,s2:5};
+function toggleGuest(btn,session){
+  const item=btn.closest('.guest-item')||btn.closest('.partner-chip');
+  const wasPaid=btn.classList.contains('paid');
+  btn.classList.toggle('paid',!wasPaid);
+  if(item){
+    item.classList.toggle('paid-row',!wasPaid);
+    const nm=item.querySelector('.guest-name');
+    if(nm) nm.style.textDecoration=wasPaid?'none':'line-through';
+  }
+  // update badge for session (only track guests, not partners)
+  if(!session.includes('sharon')){
+    unpaidCounts[session]=wasPaid?unpaidCounts[session]+1:unpaidCounts[session]-1;
+    const badge=document.getElementById(session+'-unpaid-badge');
+    if(badge){
+      if(unpaidCounts[session]===0){
+        badge.textContent='全部已付 ✓';
+        badge.className='badge b-green';
+      } else {
+        badge.textContent=unpaidCounts[session]+' 人未付';
+        badge.className='badge b-ink';
+      }
+    }
+  }
+}
+
+// ── Payout settlement ──
+const payouts={s1:false,s2:false};
+const amounts={s1:150,s2:250};
+function markPayout(id){
+  payouts[id]=!payouts[id];
+  const s=payouts[id];
+  // update badge in card
+  const badge=document.getElementById('badge-'+id);
+  if(badge){badge.textContent=s?'已匯款':'待匯款';badge.className='badge '+(s?'b-green':'b-amber');}
+  // update button text
+  const btn=document.getElementById('btn-'+id);
+  if(btn){
+    const labels={s1:'第1場 NT$150',s2:'第2場 NT$250'};
+    btn.textContent=s?'↩ '+labels[id]+' 取消':'✓ '+labels[id]+' 已匯';
+    btn.style.opacity=s?'.5':'1';
+  }
+  updateSettlement();
+}
+function updateSettlement(){
+  const pending=Object.keys(payouts).reduce((t,id)=>t+(payouts[id]?0:amounts[id]),0);
+  const hero=document.getElementById('hero-settle');
+  const amtEl=document.getElementById('settle-amount');
+  const totalEl=document.getElementById('settle-total-display');
+  amtEl.textContent='NT$'+pending;
+  if(totalEl) totalEl.textContent='NT$'+pending;
+  // header pill
+  const pill=document.getElementById('header-status');
+  if(pending===0){
+    hero.className='hero-stat settled';
+    amtEl.className='hero-amount positive';
+    amtEl.textContent='NT$0';
+    document.querySelector('#hero-settle .hero-eyebrow').textContent='✅ 合夥人帳務已全數結清';
+    document.querySelector('#hero-settle .hero-sub').textContent='';
+    pill.textContent='✅ 帳務結清';
+    pill.className='header-pill hp-ok';
+  } else {
+    pill.textContent='💰 NT$'+pending+' 待匯款';
+    pill.className='header-pill hp-pending';
+  }
+}
+
+// ── New session calculator ──
+const COST=728, CUR_INCOME=800, CUR_NET=72;
+function recalc(){
+  const v=parseInt(document.getElementById('add-venue').value)||0;
+  const t=parseInt(document.getElementById('add-total').value)||0;
+  const wrap=document.getElementById('calc-wrap');
+  if(!v||!t||t<2){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const g=t-2, vpp=Math.round(v/t), ri=g*100, each=Math.round(ri/2);
+  const gTotal=vpp+100, freshG=g*gTotal, freshTotal=freshG+vpp;
+  const newIncome=CUR_INCOME+ri, newNet=newIncome-COST, newEach=Math.round(newNet/2);
+  set('c-venue-pp',vpp.toLocaleString());
+  set('c-guests',g);
+  set('c-guest-total',gTotal.toLocaleString());
+  set('c-sharon',vpp.toLocaleString());
+  set('c-fresh-total','NT$'+freshTotal.toLocaleString());
+  set('c-g-cnt',g);
+  set('c-from-guests','NT$'+freshG.toLocaleString());
+  set('c-from-sharon','NT$'+vpp.toLocaleString());
+  set('c-ri','NT$'+newIncome.toLocaleString());
+  const netEl=document.getElementById('c-net');
+  const eachEl=document.getElementById('c-each');
+  netEl.textContent=(newNet>=0?'＋':'−')+'NT$'+Math.abs(newNet).toLocaleString();
+  netEl.style.color=newNet>=0?'var(--green)':'var(--red)';
+  eachEl.textContent=(newEach>=0?'＋':'−')+'NT$'+Math.abs(newEach).toLocaleString();
+  eachEl.style.color=newEach>=0?'var(--green)':'var(--red)';
+}
+function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+function syncGuests(){
+  const t=parseInt(document.getElementById('add-total').value)||0;
+  const g=Math.max(0,t-2);
+  const list=document.getElementById('guest-input-list');
+  const cur=list.querySelectorAll('.gi-row').length;
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if(g>cur){for(let i=cur;i<g;i++) addGuestFieldAt(i+1,alpha[i],list);}
+  else if(g<cur){const rows=list.querySelectorAll('.gi-row');for(let i=cur-1;i>=g;i--) rows[i].remove();}
+}
+function addGuestFieldAt(num,letter,container){
+  const row=document.createElement('div');
+  row.className='gi-row';
+  row.style.cssText='display:flex;align-items:center;gap:8px;';
+  row.innerHTML=`<div class="guest-avatar" style="flex-shrink:0;">${letter||num}</div><input type="text" placeholder="訪客 ${letter||num} 姓名（選填）" class="form-input" style="flex:1;padding:8px 10px;"><button onclick="this.parentElement.remove()" style="width:28px;height:28px;border:none;background:var(--paper);border-radius:50%;color:var(--ink4);cursor:pointer;font-size:16px;flex-shrink:0;border:1px solid var(--border);">×</button>`;
+  container.appendChild(row);
+}
+function addGuestField(){
+  const list=document.getElementById('guest-input-list');
+  const n=list.querySelectorAll('.gi-row').length+1;
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  addGuestFieldAt(n,alpha[n-1],list);
+}
+
+function confirmAdd(){
+  const date=document.getElementById('add-date').value;
+  const venue=parseInt(document.getElementById('add-venue').value);
+  const total=parseInt(document.getElementById('add-total').value);
+  if(!date||!venue||!total){alert('請填入日期、場地費及人數。');return;}
+  const g=total-2, vpp=Math.round(venue/total), ri=g*100;
+  const inputs=document.getElementById('guest-input-list').querySelectorAll('input');
+  const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const names=[];
+  for(let i=0;i<g;i++) names.push((inputs[i]&&inputs[i].value.trim())||'訪客 '+alpha[i]);
+  const d=new Date(date);
+  const ds=`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  const wk=['日','一','二','三','四','五','六'];
+  const n=document.querySelectorAll('#tab-payment .session-card').length+1;
+  const key='s'+n;
+  amounts[key]=Math.round(ri/2);
+  payouts[key]=false;
+
+  // inject into payment tab
+  const payTab=document.getElementById('tab-payment');
+  const firstCard=payTab.querySelector('.session-card');
+  const card=document.createElement('div');
+  card.className='session-card';
+  card.innerHTML=`
+    <div class="session-hdr" onclick="toggleSession(this)">
+      <div>
+        <div class="session-num">第${n}場</div>
+        <div class="session-date">${ds} <span style="font-weight:400;color:var(--ink4);font-size:12px;">週${wk[d.getDay()]}</span></div>
+        <div class="session-meta">共 ${total} 人・${g} 位訪客・08:00–10:00</div>
+      </div>
+      <div class="session-right">
+        <span class="badge b-ink" id="${key}-unpaid-badge">${g} 人未付</span>
+        <span class="chevron open">▼</span>
+      </div>
+    </div>
+    <div class="session-body" style="border-top:1.5px solid var(--border);padding:16px 18px;">
+      <div class="section-label">訪客・各付 <span style="font-family:'DM Mono',monospace;color:var(--amber);">NT$${(vpp+100).toLocaleString()}</span>（場地 NT$${vpp.toLocaleString()} ＋ 租借 NT$100）</div>
+      <div id="${key}-guest-list">
+        ${names.map((nm,i)=>`
+        <div class="guest-item" data-session="${key}">
+          <div class="guest-avatar">${alpha[i]}</div>
+          <div class="guest-info"><div class="guest-name">${nm}</div><div class="guest-amount">NT$${(vpp+100).toLocaleString()} → Fresh</div></div>
+          <button class="guest-check" onclick="toggleGuest(this,'${key}')">✓</button>
+        </div>`).join('')}
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">合夥人</div>
+      <div class="partner-chip" style="margin-bottom:8px;">
+        <div class="chip-av chip-av-s">S</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">Sharon</div><div style="font-size:11px;color:var(--ink4);">NT$${vpp.toLocaleString()} → Fresh</div></div>
+        <button class="guest-check" onclick="toggleGuest(this,'${key}-sharon')">✓</button>
+      </div>
+      <div class="partner-chip">
+        <div class="chip-av chip-av-f">F</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;">Fresh</div><div style="font-size:11px;color:var(--ink4);">場地費代墊人，無需匯款</div></div>
+        <span class="badge b-green">代墊中</span>
+      </div>
+      <div class="alert a-green" style="margin-top:14px;margin-bottom:0;">
+        <span>💰</span>
+        <div>本場租借收入 NT$${ri.toLocaleString()}，Sharon 與 Fresh 各應分得 <strong>NT$${Math.round(ri/2).toLocaleString()}</strong>，已列入合夥人結算。</div>
+      </div>
+    </div>`;
+  payTab.querySelector('.alert')?.after(card) || payTab.insertBefore(card, firstCard);
+
+  // inject into settlement tab
+  const settleCard=document.querySelector('#tab-settlement .card');
+  const newRow=document.createElement('div');
+  newRow.className='row';
+  newRow.innerHTML=`<div><div style="font-size:13px;font-weight:600;">第${n}場 ${ds}</div><div style="font-size:11px;color:var(--ink4);">${g}位訪客 × NT$100 = NT$${ri.toLocaleString()} 租借收入</div></div><div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--green);">NT$${Math.round(ri/2).toLocaleString()}</span><span class="badge b-amber" id="badge-${key}">待匯款</span></div>`;
+  const totalRow=settleCard.querySelector('.row:last-child');
+  settleCard.insertBefore(newRow,totalRow);
+
+  // add button to hero
+  const actionArea=document.getElementById('settle-action-area');
+  const newBtn=document.createElement('button');
+  newBtn.className='btn btn-white';
+  newBtn.id='btn-'+key;
+  newBtn.style.flex='1';
+  newBtn.textContent=`✓ 第${n}場 NT$${Math.round(ri/2).toLocaleString()} 已匯`;
+  newBtn.onclick=()=>markPayout(key);
+  actionArea.querySelector('div').appendChild(newBtn);
+
+  // reset form
+  document.getElementById('add-date').value='';
+  document.getElementById('add-venue').value='';
+  document.getElementById('add-total').value='';
+  document.getElementById('guest-input-list').innerHTML='';
+  document.getElementById('calc-wrap').style.display='none';
+  unpaidCounts[key]=g;
+  updateSettlement();
+  showTab('payment');
+}
+</script>
+</body>
+</html>
